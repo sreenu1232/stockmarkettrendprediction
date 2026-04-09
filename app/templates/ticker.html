@@ -1,0 +1,482 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Ticker Info — StockAI</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <link rel="icon" href="{% static 'image/dollar_icon.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <style>
+        /* ── Page Header ── */
+        .page-header {
+            padding: 28px 28px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem;
+            color: #fff;
+            margin: 0 0 4px;
+        }
+        .page-header p { margin: 0; color: #9eabc8; font-size: 0.9rem; }
+
+        /* ── Two-col layout ── */
+        .ticker-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+            padding: 20px 28px 0;
+        }
+        @media (max-width: 1000px) {
+            .ticker-layout { grid-template-columns: 1fr; }
+        }
+
+        /* ── Cards ── */
+        .ticker-card {
+            background: linear-gradient(180deg, #111827 0%, #0d1424 100%);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 0 0 4px;
+        }
+        .card-subtitle {
+            font-size: 0.8rem;
+            color: #7a8ab0;
+            margin-bottom: 20px;
+        }
+
+        /* ── Form fields ── */
+        .field-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a8ab0;
+            margin-bottom: 6px;
+        }
+        .ticker-input {
+            background: rgba(5,8,18,0.95) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            color: #fff !important;
+            border-radius: 10px !important;
+            font-size: 0.9rem;
+        }
+        .ticker-input:focus {
+            border-color: rgba(235,22,22,0.6) !important;
+            box-shadow: 0 0 0 3px rgba(235,22,22,0.1) !important;
+        }
+        .ticker-input::placeholder { color: #4a5570; }
+
+        .ticker-select {
+            background: rgba(5,8,18,0.95) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            color: #fff !important;
+            border-radius: 10px !important;
+            font-size: 0.875rem;
+        }
+        .ticker-select:focus {
+            border-color: rgba(235,22,22,0.6) !important;
+            box-shadow: 0 0 0 3px rgba(235,22,22,0.1) !important;
+        }
+        .ticker-select option { background: #111827; }
+        .ticker-select option:checked { background: rgba(235,22,22,0.3); }
+
+        /* ── Save button ── */
+        .save-btn {
+            width: 100%;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            background: linear-gradient(90deg, #eb1616, #ff5959) !important;
+            border: 0 !important;
+            border-radius: 10px !important;
+            padding: 12px !important;
+            box-shadow: 0 8px 24px rgba(235,22,22,0.28) !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+        }
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(235,22,22,0.38) !important;
+        }
+
+        /* ── Status messages ── */
+        .status-msg {
+            font-size: 0.83rem;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .status-success {
+            background: rgba(0,208,132,0.08);
+            border: 1px solid rgba(0,208,132,0.25);
+            color: #00d084;
+        }
+        .status-warning {
+            background: rgba(247,167,79,0.08);
+            border: 1px solid rgba(247,167,79,0.25);
+            color: #f7a74f;
+        }
+
+        /* ── Table ── */
+        .ticker-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .section-link {
+            font-size: 0.8rem;
+            color: #eb1616;
+            text-decoration: none;
+        }
+        .section-link:hover { color: #ff5959; }
+
+        .search-wrap {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .search-wrap .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4a5570;
+            pointer-events: none;
+        }
+        .search-wrap input {
+            padding-left: 40px !important;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.875rem;
+        }
+        .data-table thead th {
+            background: rgba(255,255,255,0.03);
+            color: #7a8ab0;
+            font-weight: 600;
+            font-size: 0.73rem;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .data-table tbody td {
+            padding: 11px 16px;
+            color: #d9e2ff;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: middle;
+        }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr { transition: background 0.15s; }
+        .data-table tbody tr:hover { background: rgba(235,22,22,0.06); }
+
+        .symbol-cell {
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #ff6b6b;
+            background: rgba(235,22,22,0.1);
+            border: 1px solid rgba(235,22,22,0.2);
+            border-radius: 6px;
+            padding: 3px 10px;
+            display: inline-block;
+            letter-spacing: 0.04em;
+        }
+        .table-scroll-wrap {
+            max-height: 480px;
+            overflow-y: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .table-scroll-wrap::-webkit-scrollbar { width: 5px; }
+        .table-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
+        .table-scroll-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        /* ── Tip ── */
+        .helper-tip {
+            font-size: 0.78rem;
+            color: #5a6a8a;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ── Footer ── */
+        .page-footer {
+            margin: 24px 28px 28px;
+            padding: 18px 24px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: #7a8ab0;
+        }
+        .page-footer a { color: #9eabc8; text-decoration: none; }
+        .page-footer a:hover { color: #fff; }
+    </style>
+</head>
+
+<body>
+<div class="container-fluid position-relative d-flex p-0">
+
+    <!-- Spinner -->
+    <div id="spinner" class="show bg-dark position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar pe-4 pb-3">
+        <nav class="navbar bg-secondary navbar-dark">
+            <a href="../" class="navbar-brand mx-4 mb-3">
+                <h3 class="text-primary mb-0"><i class="fa fa-chart-line me-2"></i>StockAI</h3>
+            </a>
+            <div class="d-flex align-items-center ms-4 mb-4">
+                <div class="position-relative">
+                    <img class="rounded-circle" src="{% static 'image/user.png' %}" alt="" style="width: 40px; height: 40px;">
+                    <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
+                </div>
+                <div class="ms-3">
+                    <h6 class="mb-0 text-white" style="font-size:.85rem;">Welcome back</h6>
+                    <span style="font-size:.8rem;color:#9eabc8;">{{ current_username|default:"Guest" }}</span>
+                </div>
+            </div>
+            <div class="navbar-nav w-100">
+                <a href="../" class="nav-item nav-link"><i class="fa fa-home me-2"></i>Dashboard</a>
+                <a href="/search" class="nav-item nav-link"><i class="fa fa-chart-bar me-2"></i>Predict</a>
+                <a href="#" class="nav-item nav-link active"><i class="fa fa-list-alt me-2"></i>Ticker Info</a>
+                <a href="/users/" class="nav-item nav-link"><i class="fa fa-users me-2"></i>Users</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand bg-secondary navbar-dark sticky-top px-4 py-0">
+            <a href="../" class="navbar-brand d-flex d-lg-none me-4">
+                <h2 class="text-primary mb-0"><i class="fa fa-chart-line"></i></h2>
+            </a>
+            <a href="#" class="sidebar-toggler flex-shrink-0"><i class="fa fa-bars"></i></a>
+            <div class="navbar-nav align-items-center ms-auto">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <img class="rounded-circle me-lg-2" src="{% static 'image/user.png' %}" alt="" style="width: 36px; height: 36px;">
+                        <span class="d-none d-lg-inline-flex">{{ current_username|default:"Guest" }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-bottom m-0">
+                        <a href="/search" class="dropdown-item"><i class="fa fa-chart-bar me-2"></i>Predict</a>
+                        <a href="/ticker" class="dropdown-item"><i class="fa fa-list-alt me-2"></i>Ticker Info</a>
+                        <a href="/users/" class="dropdown-item"><i class="fa fa-users me-2"></i>Users</a>
+                        <div class="dropdown-divider" style="border-color:rgba(255,255,255,0.08);"></div>
+                        <a href="/logout/" class="dropdown-item text-danger"><i class="fa fa-sign-out-alt me-2"></i>Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h2><i class="fa fa-list-alt me-2 text-primary" style="font-size:1.2rem;"></i>Ticker Information</h2>
+                <p>Browse all supported tickers and configure dashboard active stocks</p>
+            </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="ticker-layout">
+
+            <!-- Left: Set Active Stocks -->
+            <div class="ticker-card">
+                <div class="card-title"><i class="bi bi-pin-fill me-2 text-primary"></i>Active Stocks</div>
+                <div class="card-subtitle">Stocks displayed on the dashboard home chart</div>
+
+                {% if saved_count != None %}
+                <div class="status-msg status-success">
+                    <i class="bi bi-check-circle me-2"></i>Saved {{saved_count}} active stock(s).
+                </div>
+                {% endif %}
+                {% if invalid_count != None and invalid_count != '0' %}
+                <div class="status-msg status-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Ignored {{invalid_count}} invalid ticker(s).
+                </div>
+                {% endif %}
+
+                <form method="post" action="/set-active-stocks/">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <div class="field-label">Search &amp; Filter</div>
+                        <div class="search-wrap">
+                            <i class="bi bi-search search-icon"></i>
+                            <input id="active_ticker_search" type="text" class="form-control ticker-input" placeholder="Type symbol or company name">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="field-label">Select from List</div>
+                        <select id="active_tickers" name="active_tickers" class="form-select ticker-select" multiple size="7">
+                            {% for i in ticker_list %}
+                            <option value="{{i.Symbol}}" {% if i.Symbol in active_stocks %}selected{% endif %}>
+                                {{i.Symbol}} — {{i.Name}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="helper-tip mt-2">
+                            <i class="bi bi-info-circle"></i>
+                            Hold Ctrl (or Cmd on Mac) to select multiple
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="field-label">Or Type Symbols Manually</div>
+                        <input id="manual_tickers" name="manual_tickers" type="text"
+                               class="form-control ticker-input" placeholder="AAPL, MSFT, NVDA, TSLA">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary save-btn">
+                        <i class="bi bi-save me-2"></i>Save Active Stocks
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right: All Tickers Table -->
+            <div class="ticker-card">
+                <div class="ticker-section-header">
+                    <div>
+                        <div class="card-title"><i class="bi bi-table me-2 text-primary"></i>All Tickers</div>
+                        <div class="card-subtitle">Full list of supported symbols</div>
+                    </div>
+                    <a href="https://finance.yahoo.com/trending-tickers" class="section-link" target="_blank" rel="noopener">
+                        Yahoo Finance <i class="bi bi-box-arrow-up-right ms-1"></i>
+                    </a>
+                </div>
+
+                <div class="search-wrap">
+                    <i class="bi bi-search search-icon"></i>
+                    <input id="ticker_table_search" type="text" class="form-control ticker-input" placeholder="Search by symbol or company name">
+                </div>
+
+                <div class="table-scroll-wrap">
+                    <table id="ticker_info_table" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Company Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticker_info_body">
+                            {% if ticker_list %}
+                            {% for i in ticker_list %}
+                            <tr class="ticker-row">
+                                <td><span class="symbol-cell">{{i.Symbol}}</span></td>
+                                <td>{{i.Name}}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            <tr id="no_ticker_results" style="display:none;">
+                                <td colspan="2" class="text-center py-4" style="color:#7a8ab0;">
+                                    <i class="bi bi-search" style="display:block;font-size:1.4rem;margin-bottom:6px;"></i>
+                                    No matching ticker found.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="page-footer">
+            <span>&copy; 2026 <a href="#">Narakatla Sreenivasulu</a>. All rights reserved.</span>
+            <span>Designed by <a href="https://portfolio-website-azure-eta.vercel.app/" target="_blank">Narakatla Sreenivasulu</a></span>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Top -->
+<a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'lib/chart/chart.min.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+<script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+<script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+<script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+<script>
+    (function () {
+        var activeSearch = document.getElementById('active_ticker_search');
+        var activeSelect = document.getElementById('active_tickers');
+        var tableSearch = document.getElementById('ticker_table_search');
+        var tableRows = document.querySelectorAll('#ticker_info_body .ticker-row');
+        var emptyRow = document.getElementById('no_ticker_results');
+
+        function filterActiveOptions() {
+            if (!activeSearch || !activeSelect) return;
+            var q = activeSearch.value.trim().toLowerCase();
+            for (var i = 0; i < activeSelect.options.length; i++) {
+                activeSelect.options[i].style.display =
+                    activeSelect.options[i].text.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+            }
+        }
+
+        function filterTickerTable() {
+            if (!tableSearch || !tableRows.length) return;
+            var q = tableSearch.value.trim().toLowerCase();
+            var visible = 0;
+            tableRows.forEach(function (row) {
+                var match = row.textContent.toLowerCase().indexOf(q) !== -1;
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            if (emptyRow) emptyRow.style.display = visible === 0 ? '' : 'none';
+        }
+
+        if (activeSearch) activeSearch.addEventListener('input', filterActiveOptions);
+        if (tableSearch) tableSearch.addEventListener('input', filterTickerTable);
+    })();
+</script>
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
